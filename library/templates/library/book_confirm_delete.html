@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirm Deletion | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090d;
+            --card: #111520;
+            --input-bg: #161b27;
+            --border: rgba(255,255,255,0.07);
+            --border-h: rgba(255,255,255,0.12);
+            --text: #f0f2f7;
+            --muted: #6b7494;
+            --subtle: #2e3450;
+            --accent: #f97316;
+            --accent2: #f43f5e;
+            --danger: #f87171;
+            --danger-mid: #ef4444;
+            --danger-dark: #dc2626;
+            --danger-glow: rgba(239,68,68,0.18);
+            --danger-glow-strong: rgba(239,68,68,0.30);
+            --danger-border: rgba(239,68,68,0.22);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ── Atmosphere ── */
+        .bg-radial {
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(239,68,68,0.08) 0%, transparent 68%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-radial-2 {
+            position: fixed;
+            bottom: -25%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(249,115,22,0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.028) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Floating particles ── */
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: drift linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes drift {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ── Card ── */
+        .card {
+            position: relative;
+            z-index: 1;
+            width: min(480px, 100%);
+            background: var(--card);
+            border: 1px solid var(--danger-border);
+            border-radius: 24px;
+            padding: 48px 44px 40px;
+            text-align: center;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 24px 64px rgba(0,0,0,0.5),
+                0 0 80px rgba(239,68,68,0.06);
+            animation: cardIn 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(-24px) scale(0.94); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Top danger line */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 30px; right: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--danger-mid), transparent);
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Corner scatter glow */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -80px; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 180px;
+            background: radial-gradient(ellipse at center, rgba(239,68,68,0.10) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── Brand strip ── */
+        .brand {
+            position: absolute;
+            top: 20px; left: 50%; transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.5;
+        }
+
+        .brand-dot {
+            width: 22px; height: 22px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .brand-dot svg { width: 11px; height: 11px; fill: white; }
+
+        .brand-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Icon ── */
+        .icon-wrap {
+            margin: 32px auto 28px;
+            position: relative;
+            width: 80px; height: 80px;
+        }
+
+        /* Ring pulses */
+        .ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 1.5px solid rgba(239,68,68,0.3);
+            animation: ringPulse 2.4s ease-out infinite;
+        }
+
+        .ring:nth-child(2) { animation-delay: 0.8s; }
+        .ring:nth-child(3) { animation-delay: 1.6s; }
+
+        @keyframes ringPulse {
+            0%   { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .icon-box {
+            position: absolute;
+            inset: 0;
+            background: rgba(239,68,68,0.10);
+            border: 1.5px solid rgba(239,68,68,0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--danger);
+        }
+
+        .icon-box svg { width: 32px; height: 32px; }
+
+        /* ── Text ── */
+        .eyebrow {
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--danger);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .eyebrow::before,
+        .eyebrow::after {
+            content: '';
+            display: inline-block;
+            width: 20px; height: 1.5px;
+            background: var(--danger);
+            border-radius: 2px;
+            opacity: 0.5;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .book-name-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(239,68,68,0.07);
+            border: 1px solid rgba(239,68,68,0.15);
+            border-radius: 10px;
+            padding: 8px 16px;
+            margin: 4px auto 20px;
+            max-width: 100%;
+        }
+
+        .book-name-box svg {
+            width: 14px; height: 14px;
+            fill: none; stroke: var(--danger);
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            flex-shrink: 0; opacity: 0.7;
+        }
+
+        .book-name-box strong {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--danger);
+            line-height: 1.4;
+        }
+
+        .warning-text {
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 300;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        /* Warning chip */
+        .warn-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(249,115,22,0.07);
+            border: 1px solid rgba(249,115,22,0.15);
+            border-radius: 99px;
+            padding: 5px 12px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: rgba(249,115,22,0.8);
+            margin-bottom: 28px;
+        }
+
+        .warn-chip svg {
+            width: 11px; height: 11px;
+            fill: none; stroke: currentColor;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin-bottom: 24px;
+        }
+
+        /* ── Buttons ── */
+        .actions { display: flex; flex-direction: column; gap: 12px; }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.15s, opacity 0.15s;
+        }
+
+        .btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+        /* Danger */
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-mid) 0%, #b91c1c 100%);
+            color: white;
+            box-shadow:
+                0 0 0 1px rgba(239,68,68,0.3),
+                0 4px 18px rgba(239,68,68,0.28),
+                inset 0 1px 0 rgba(255,255,255,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-danger::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-danger:hover::before { left: 100%; }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 0 0 1px rgba(239,68,68,0.4),
+                0 8px 28px rgba(239,68,68,0.38),
+                inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+
+        .btn-danger:active { transform: translateY(0); opacity: 0.88; }
+
+        /* Cancel */
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border-h);
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .btn-cancel:hover {
+            border-color: rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.03);
+            color: var(--text);
+        }
+
+        /* ── Footer ── */
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.72rem;
+            color: var(--subtle);
+            line-height: 1.7;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            body { padding: 12px 0; }
+            .card { padding: 36px 24px 28px; }
+            h2 { font-size: 1.55rem; }
+            .btn-danger, .btn-cancel { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-radial"></div>
+<div class="bg-radial-2"></div>
+<div class="bg-grid"></div>
+
+<!-- Floating particles -->
+<div class="particle" style="left:15%;width:4px;height:4px;background:rgba(239,68,68,0.4);animation-duration:8s;animation-delay:0s;"></div>
+<div class="particle" style="left:30%;width:3px;height:3px;background:rgba(249,115,22,0.3);animation-duration:11s;animation-delay:2s;"></div>
+<div class="particle" style="left:55%;width:5px;height:5px;background:rgba(239,68,68,0.25);animation-duration:9s;animation-delay:4s;"></div>
+<div class="particle" style="left:75%;width:3px;height:3px;background:rgba(249,115,22,0.35);animation-duration:13s;animation-delay:1s;"></div>
+<div class="particle" style="left:88%;width:4px;height:4px;background:rgba(239,68,68,0.3);animation-duration:10s;animation-delay:6s;"></div>
+
+<form class="card" method="post">
+    {% csrf_token %}
+
+    <!-- Brand -->
+    <div class="brand">
+        <div class="brand-dot">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="brand-name">LibraryLMS</span>
+    </div>
+
+    <!-- Pulsing icon -->
+    <div class="icon-wrap">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="icon-box">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Eyebrow -->
+    <div class="eyebrow">Irreversible Action</div>
+
+    <!-- Heading -->
+    <h2>Delete this Book?</h2>
+
+    <!-- Book name chip -->
+    <div class="book-name-box">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        <strong>"{{ book.title }}"</strong>
+    </div>
+
+    <!-- Warning chip -->
+    <div class="warn-chip">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        All associated records will also be removed
+    </div>
+
+    <!-- Body text -->
+    <p class="warning-text">
+        This will permanently erase the book and all its<br>circulation history. There is no way to recover it.
+    </p>
+
+    <div class="divider"></div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button class="btn btn-danger" type="submit">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Yes, Delete Forever
+        </button>
+        <a class="btn btn-cancel" href="{% url 'book_list' %}">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            No, Keep It Safe
+        </a>
+    </div>
+
+    <p class="footer-note">This action is logged and cannot be reversed by anyone.</p>
+
+</form>
+
+</body>
+</html>

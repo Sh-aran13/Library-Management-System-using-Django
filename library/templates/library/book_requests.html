@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Requests | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f1a;
+            --surface: #13162a;
+            --surface2: #1a1e35;
+            --surface3: #202540;
+            --text: #e8eaf6;
+            --text-dim: #8b90b8;
+            --line: rgba(255,255,255,0.07);
+            --primary: #7c6af5;
+            --primary-glow: rgba(124,106,245,0.25);
+            --primary-dim: rgba(124,106,245,0.12);
+            --danger: #f87171;
+            --danger-dim: rgba(248,113,113,0.12);
+            --warning: #fbbf24;
+            --warning-dim: rgba(251,191,36,0.12);
+            --ok: #34d399;
+            --ok-dim: rgba(52,211,153,0.12);
+            --gold: #f5c842;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Animated background ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% -10%, rgba(124,106,245,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 85% 90%, rgba(52,211,153,0.10) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 50% at 60% 50%, rgba(124,106,245,0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            animation: drift 20s ease-in-out infinite alternate;
+        }
+        .orb-1 { width: 400px; height: 400px; top: -120px; left: -80px; background: rgba(124,106,245,0.12); animation-duration: 18s; }
+        .orb-2 { width: 300px; height: 300px; bottom: -60px; right: -60px; background: rgba(52,211,153,0.09); animation-duration: 24s; animation-delay: -8s; }
+        .orb-3 { width: 200px; height: 200px; top: 50%; left: 60%; background: rgba(245,200,66,0.06); animation-duration: 30s; animation-delay: -15s; }
+
+        @keyframes drift {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 40px) scale(1.1); }
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 36px 20px 60px;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 36px;
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .header-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), #9c6af5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 0 0 1px rgba(124,106,245,0.4), 0 8px 32px rgba(124,106,245,0.3);
+            flex-shrink: 0;
+        }
+
+        .header-title h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            background: linear-gradient(130deg, #e8eaf6 30%, #a5a8d5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            white-space: nowrap;
+            backdrop-filter: blur(8px);
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.09);
+            color: var(--text);
+            border-color: rgba(255,255,255,0.14);
+            transform: translateY(-1px);
+        }
+        .back-btn::before { content: '←'; font-size: 1rem; }
+
+        /* ── Stats strip ── */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .stat-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .stat-info { flex: 1; }
+        .stat-num { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+        .stat-label { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        /* ── Filters ── */
+        .filters-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+            animation: fadeUp 0.6s 0.15s ease both;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 5px;
+        }
+
+        .pill {
+            padding: 7px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .pill:hover { color: var(--text); background: var(--surface2); }
+        .pill.active {
+            background: linear-gradient(135deg, var(--primary), #9c6af5);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124,106,245,0.35);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 9px 14px;
+            min-width: 220px;
+        }
+        .search-box input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            width: 100%;
+        }
+        .search-box input::placeholder { color: var(--text-dim); }
+        .search-icon { color: var(--text-dim); font-size: 1rem; }
+
+        /* ── Table card ── */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: fadeUp 0.6s 0.2s ease both;
+            box-shadow: 0 4px 40px rgba(0,0,0,0.3);
+        }
+
+        .table-scroll { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 820px;
+        }
+
+        thead tr {
+            background: var(--surface2);
+            border-bottom: 1px solid var(--line);
+        }
+
+        th {
+            padding: 13px 16px;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--line);
+            transition: background 0.18s;
+            animation: rowIn 0.4s ease both;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface2); }
+
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        /* Student cell */
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), #9c6af5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            letter-spacing: 0.03em;
+        }
+        .student-name { font-weight: 600; color: var(--text); }
+
+        /* Book cell */
+        .book-title { font-weight: 600; color: var(--text); line-height: 1.3; }
+        .book-isbn {
+            font-size: 0.76rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.04em;
+        }
+
+        /* Date cell */
+        .date-main { font-weight: 500; color: var(--text); }
+        .date-time { font-size: 0.76rem; color: var(--text-dim); margin-top: 2px; }
+
+        /* Status badge */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .status.pending  { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(251,191,36,0.2); }
+        .status.pending::before  { background: var(--warning); box-shadow: 0 0 6px var(--warning); animation: pulse 1.5s infinite; }
+        .status.issued   { background: var(--ok-dim);      color: var(--ok);      border: 1px solid rgba(52,211,153,0.2); }
+        .status.issued::before   { background: var(--ok); }
+        .status.rejected { background: var(--danger-dim);  color: var(--danger);  border: 1px solid rgba(248,113,113,0.2); }
+        .status.rejected::before { background: var(--danger); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+
+        /* Note cell */
+        .note-text {
+            font-size: 0.84rem;
+            color: var(--text-dim);
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Action buttons */
+        .action-group { display: flex; gap: 7px; align-items: center; flex-wrap: nowrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 13px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-issue {
+            background: linear-gradient(135deg, var(--primary), #9c6af5);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124,106,245,0.3);
+        }
+        .btn-issue:hover {
+            box-shadow: 0 6px 22px rgba(124,106,245,0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background: var(--danger-dim);
+            color: var(--danger);
+            border: 1px solid rgba(248,113,113,0.2);
+        }
+        .btn-reject:hover {
+            background: rgba(248,113,113,0.2);
+            transform: translateY(-1px);
+        }
+
+        .processed-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .processed-label::before { content: '✓'; color: var(--ok); }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 72px 20px;
+            gap: 12px;
+        }
+        .empty-icon {
+            font-size: 3.5rem;
+            opacity: 0.3;
+        }
+        .empty-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            color: var(--text-dim);
+        }
+        .empty-sub { font-size: 0.88rem; color: var(--text-dim); opacity: 0.7; }
+
+        /* Pagination area */
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 14px 18px;
+            border-top: 1px solid var(--line);
+            background: var(--surface2);
+        }
+        .table-footer-info { font-size: 0.82rem; color: var(--text-dim); }
+
+        /* Animations */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stagger rows */
+        tbody tr:nth-child(1)  { animation-delay: 0.05s; }
+        tbody tr:nth-child(2)  { animation-delay: 0.10s; }
+        tbody tr:nth-child(3)  { animation-delay: 0.15s; }
+        tbody tr:nth-child(4)  { animation-delay: 0.20s; }
+        tbody tr:nth-child(5)  { animation-delay: 0.25s; }
+        tbody tr:nth-child(6)  { animation-delay: 0.30s; }
+        tbody tr:nth-child(7)  { animation-delay: 0.35s; }
+        tbody tr:nth-child(8)  { animation-delay: 0.40s; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        @media (max-width: 680px) {
+            .header-title h1 { font-size: 1.5rem; }
+            .stats { grid-template-columns: 1fr; }
+            .search-box { min-width: 100%; }
+            .filters-row { flex-direction: column; align-items: stretch; }
+            .filter-pills { overflow-x: auto; white-space: nowrap; padding-bottom: 4px; }
+            .table-scroll { -webkit-overflow-scrolling: touch; }
+            table { min-width: 700px; }
+            th, td { padding-left: 12px; padding-right: 12px; }
+        }
+
+        @media (max-width: 460px) {
+            .wrap { padding: 20px 14px 48px; }
+            table { min-width: 640px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">📚</div>
+            <div class="header-title">
+                <h1>Book Requests</h1>
+                    <p>Students request books</p>
+            </div>
+        </div>
+        <a class="back-btn" href="{% url 'dashboard' %}"></a>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-dot" style="background:var(--text-dim);"></div>
+            <div class="stat-info">
+                <div class="stat-num" style="color:var(--text);">{{ book_requests|length }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-dot" style="background:var(--warning); box-shadow:0 0 8px var(--warning);"></div>
+            <div class="stat-info">
+                <div class="stat-num" style="color:var(--warning);">{{ pending_count|default:"0" }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-dot" style="background:var(--ok);"></div>
+            <div class="stat-info">
+                <div class="stat-num" style="color:var(--ok);">{{ issued_count|default:"0" }}</div>
+                <div class="stat-label">Issued</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-dot" style="background:var(--danger);"></div>
+            <div class="stat-info">
+                <div class="stat-num" style="color:var(--danger);">{{ rejected_count|default:"0" }}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Row -->
+    <div class="filters-row">
+        <div class="filter-pills">
+            <a class="pill {% if not selected_status %}active{% endif %}" href="{% url 'book_requests' %}">All</a>
+            <a class="pill {% if selected_status == 'pending' %}active{% endif %}" href="{% url 'book_requests' %}?status=pending">⏳ Pending</a>
+            <a class="pill {% if selected_status == 'issued' %}active{% endif %}" href="{% url 'book_requests' %}?status=issued">✅ Issued</a>
+            <a class="pill {% if selected_status == 'rejected' %}active{% endif %}" href="{% url 'book_requests' %}?status=rejected">❌ Rejected</a>
+        </div>
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search student or book…" id="searchInput" oninput="filterRows()" />
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="table-scroll">
+            <table id="requestsTable">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Book</th>
+                        <th>Requested At</th>
+                        <th>Status</th>
+                        <th>Note</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for req in book_requests %}
+                    <tr class="data-row">
+                        <td>
+                            <div class="student-cell">
+                                <div class="avatar">{{ req.member.username|slice:":2"|upper }}</div>
+                                <div class="student-name">{{ req.member.username }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="book-title">{{ req.book.title }}</div>
+                            <div class="book-isbn">ISBN: {{ req.book.isbn }}</div>
+                        </td>
+                        <td>
+                            <div class="date-main">{{ req.requested_at|date:"d M Y" }}</div>
+                            <div class="date-time">{{ req.requested_at|date:"H:i" }}</div>
+                        </td>
+                        <td>
+                            <span class="status {{ req.status }}">{{ req.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <div class="note-text" title="{{ req.note }}">{{ req.note|default:"—" }}</div>
+                        </td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                                <div class="action-group">
+                                    <a class="btn btn-issue" href="{% url 'issue_book' %}?request={{ req.id }}">⚡ Issue Now</a>
+                                    <a class="btn btn-reject" href="{% url 'reject_book_request' req.id %}">Reject</a>
+                                </div>
+                            {% else %}
+                                <span class="processed-label">Processed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <div class="empty-title">No requests found</div>
+                                <div class="empty-sub">When students submit book requests, they'll appear here.</div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if book_requests %}
+        <div class="table-footer">
+            <div class="table-footer-info">Showing <strong>{{ book_requests|length }}</strong> request{{ book_requests|length|pluralize }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    function filterRows() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#tableBody .data-row').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(q) ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>

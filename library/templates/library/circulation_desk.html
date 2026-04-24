@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circulation Desk | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:          #06090f;
+            --surface:     #0c1119;
+            --surface2:    #111823;
+            --surface3:    #18202e;
+            --text:        #dde5f5;
+            --text-dim:    #4e5e78;
+            --line:        rgba(255,255,255,0.055);
+            --line2:       rgba(255,255,255,0.10);
+            --blue:        #4f8ef7;
+            --blue-g:      rgba(79,142,247,0.22);
+            --blue-s:      rgba(79,142,247,0.08);
+            --blue-line:   rgba(79,142,247,0.30);
+            --amber:       #f5a623;
+            --amber-g:     rgba(245,166,35,0.22);
+            --amber-s:     rgba(245,166,35,0.07);
+            --amber-line:  rgba(245,166,35,0.30);
+            --danger:      #f87171;
+            --danger-s:    rgba(248,113,113,0.10);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 55% 50% at 0%   0%,   rgba(79,142,247,0.12)  0%, transparent 55%),
+                radial-gradient(ellipse 55% 50% at 100% 100%, rgba(245,166,35,0.10)  0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 50%  50%,  rgba(79,142,247,0.04)  0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: repeating-linear-gradient(
+                0deg, transparent, transparent 3px,
+                rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
+            );
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .orb { position:fixed; border-radius:50%; filter:blur(110px); pointer-events:none; z-index:0; }
+        .orb-1 { width:500px; height:500px; top:-160px; left:-130px;    background:rgba(79,142,247,0.09);  animation:drift 22s ease-in-out infinite alternate; }
+        .orb-2 { width:420px; height:420px; bottom:-120px; right:-100px; background:rgba(245,166,35,0.08); animation:drift 28s ease-in-out infinite alternate-reverse; }
+        @keyframes drift { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,40px) scale(1.12)} }
+
+        .wrap {
+            position: relative; z-index: 1;
+            max-width: 1020px;
+            margin: 0 auto;
+            padding: 44px 22px 80px;
+        }
+
+        /* ══ HEADER ══ */
+        .nav-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 40px;
+            animation: fadeDown 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.67rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--blue);
+            margin-bottom: 10px;
+        }
+        .eyebrow-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--blue);
+            box-shadow: 0 0 8px var(--blue);
+            animation: blink 2s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+            color: var(--text);
+        }
+        .page-title em {
+            font-style: normal;
+            background: linear-gradient(90deg, var(--blue), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-sub {
+            margin-top: 9px;
+            font-size: 0.88rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 20px;
+            border-radius: 13px;
+            background: var(--surface);
+            border: 1px solid var(--line2);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+        .back-btn:hover {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+            transform: translateX(-3px);
+            box-shadow: 0 8px 24px var(--blue-g);
+        }
+        .back-btn svg { transition: transform 0.2s; }
+        .back-btn:hover svg { transform: translateX(-2px); }
+
+        /* ══ DESK GRID ══ */
+        .desk-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            animation: fadeUp 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        .pane {
+            border-radius: 22px;
+            border: 1px solid var(--line2);
+            background: var(--surface);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .pane:hover { transform: translateY(-4px); }
+
+        .pane.issue  { box-shadow: 0 0 0 1px var(--blue-line),  0 30px 60px rgba(0,0,0,0.4); }
+        .pane.return { box-shadow: 0 0 0 1px var(--amber-line), 0 30px 60px rgba(0,0,0,0.4); }
+        .pane.issue:hover  { box-shadow: 0 0 0 1px rgba(79,142,247,0.5),  0 40px 80px rgba(79,142,247,0.15); }
+        .pane.return:hover { box-shadow: 0 0 0 1px rgba(245,166,35,0.5), 0 40px 80px rgba(245,166,35,0.12); }
+
+        .pane-head {
+            position: relative;
+            padding: 28px 28px 24px;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .pane.issue  .pane-head { background: linear-gradient(145deg, rgba(79,142,247,0.14) 0%, transparent 70%); }
+        .pane.return .pane-head { background: linear-gradient(145deg, rgba(245,166,35,0.12) 0%, transparent 70%); }
+
+        .pane-head::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 18px 18px;
+            pointer-events: none;
+        }
+        .pane-head::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .pane.issue  .pane-head::after { background: linear-gradient(90deg, var(--blue), #818cf8); }
+        .pane.return .pane-head::after { background: linear-gradient(90deg, var(--amber), #fb923c); }
+
+        .pane-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px;
+            position: relative; z-index: 1;
+        }
+        .pane.issue  .pane-icon { background: var(--blue-s);  border: 1px solid var(--blue-line);  box-shadow: 0 0 20px var(--blue-g); }
+        .pane.return .pane-icon { background: var(--amber-s); border: 1px solid var(--amber-line); box-shadow: 0 0 20px var(--amber-g); }
+
+        .pane-title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            position: relative; z-index: 1;
+        }
+        .pane-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+            position: relative; z-index: 1;
+        }
+
+        .fixed-due-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #dbeafe;
+            background: rgba(79,142,247,0.10);
+            border: 1px solid rgba(79,142,247,0.25);
+            position: relative;
+            z-index: 1;
+        }
+
+        .fixed-due-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #60a5fa;
+            box-shadow: 0 0 10px rgba(96,165,250,0.9);
+        }
+
+        .pane-divider {
+            height: 1px;
+            margin: 0 28px;
+            position: relative; z-index: 1;
+        }
+        .pane.issue  .pane-divider { background: linear-gradient(90deg, var(--blue-line), transparent); }
+        .pane.return .pane-divider { background: linear-gradient(90deg, var(--amber-line), transparent); }
+
+        .pane-body {
+            padding: 24px 28px 28px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative; z-index: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 0.67rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--line2);
+            background: var(--surface2);
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input::placeholder { color: var(--text-dim); }
+
+        .pane.issue input:focus,
+        .pane.issue select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--blue-g);
+            background: rgba(79,142,247,0.06);
+        }
+        .pane.return input:focus,
+        .pane.return select:focus {
+            border-color: var(--amber);
+            box-shadow: 0 0 0 3px var(--amber-g);
+            background: rgba(245,166,35,0.05);
+        }
+
+        .help-txt {
+            margin: -12px 0 14px;
+            font-size: 0.73rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .err-txt {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--danger);
+            font-size: 0.76rem;
+            font-weight: 700;
+            margin: -12px 0 14px;
+            background: var(--danger-s);
+            border: 1px solid rgba(248,113,113,0.18);
+            border-radius: 9px;
+            padding: 6px 10px;
+        }
+        .err-txt::before { content: '⚠'; }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            border-radius: 13px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            letter-spacing: 0.02em;
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .btn-action::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-18deg);
+            transition: left 0.5s ease;
+        }
+        .btn-action:hover::after { left: 160%; }
+
+        .btn-issue {
+            background: linear-gradient(135deg, var(--blue), #6366f1);
+            color: #fff;
+            box-shadow: 0 6px 20px var(--blue-g);
+        }
+        .btn-issue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(79,142,247,0.4);
+        }
+
+        .btn-return {
+            background: linear-gradient(135deg, var(--amber), #f97316);
+            color: #1a0e00;
+            box-shadow: 0 6px 20px var(--amber-g);
+        }
+        .btn-return:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(245,166,35,0.35);
+        }
+
+        @keyframes fadeDown {
+            from { opacity:0; transform:translateY(-18px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(22px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:4px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--blue); }
+
+        @media (max-width: 780px) {
+            .desk-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 2rem; }
+            .nav-header { flex-direction: column; }
+            .back-btn { align-self: flex-start; }
+            .pane-head, .pane-body { padding-left: 20px; padding-right: 20px; }
+            .pane-divider { margin: 0 20px; }
+        }
+
+        @media (max-width: 520px) {
+            .wrap { padding: 24px 14px 50px; }
+            .page-title { font-size: 1.65rem; }
+            .page-sub { font-size: 0.82rem; }
+            .back-btn { width: 100%; justify-content: center; }
+            .pane-head, .pane-body { padding-left: 14px; padding-right: 14px; }
+            .pane-divider { margin: 0 14px; }
+            .btn-action { width: 100%; justify-content: center; }
+            input, select, textarea { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrap">
+
+    <div class="nav-header">
+        <div>
+            <div class="eyebrow"><span class="eyebrow-dot"></span>Librarian Panel</div>
+            <h1 class="page-title">Circulation <em>Desk</em></h1>
+            <p class="page-sub">Instant processing via member username and book ISBN. Due period is fixed at 14 days.</p>
+        </div>
+        <a class="back-btn" href="{% url 'dashboard' %}">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="desk-grid">
+
+        <!-- ISSUE -->
+        <section class="pane issue">
+            <div class="pane-head">
+                <div class="pane-icon">
+                    <svg width="24" height="24" fill="none" stroke="#4f8ef7" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </div>
+                <div class="pane-title">Issue Book</div>
+                <div class="pane-subtitle">Check a book out to a member · Due period fixed at 14 days</div>
+                <div class="fixed-due-badge">Fixed: 14 days</div>
+            </div>
+            <div class="pane-divider"></div>
+            <div class="pane-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="checkin" />
+                    {% for field in checkout_form %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<p class="help-txt">{{ field.help_text }}</p>{% endif %}
+                        {% for error in field.errors %}<div class="err-txt">{{ error }}</div>{% endfor %}
+                    {% endfor %}
+                    {% for error in checkout_form.non_field_errors %}<div class="err-txt">{{ error }}</div>{% endfor %}
+                    <button class="btn-action btn-issue" type="submit">
+                        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Confirm Issue
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- RETURN -->
+        <section class="pane return">
+            <div class="pane-head">
+                <div class="pane-icon">
+                    <svg width="24" height="24" fill="none" stroke="#f5a623" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 15l-4 4m0 0l-4-4m4 4V5"/>
+                    </svg>
+                </div>
+                <div class="pane-title">Process Return</div>
+                <div class="pane-subtitle">Mark a borrowed book as returned</div>
+            </div>
+            <div class="pane-divider"></div>
+            <div class="pane-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="checkout" />
+                    {% for field in checkin_form %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<p class="help-txt">{{ field.help_text }}</p>{% endif %}
+                        {% for error in field.errors %}<div class="err-txt">{{ error }}</div>{% endfor %}
+                    {% endfor %}
+                    {% for error in checkin_form.non_field_errors %}<div class="err-txt">{{ error }}</div>{% endfor %}
+                    <button class="btn-action btn-return" type="submit">
+                        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Mark as Returned
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+</body>
+</html>

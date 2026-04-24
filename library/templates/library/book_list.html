@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Catalog | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lexend:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ══════════════════════════════════════════════════════
+           PRESTIGE EDITION — Obsidian & Gold Leaf
+           Deep void backdrop, liquid gold accents,
+           glass-frosted surfaces, editorial refinement
+        ══════════════════════════════════════════════════════ */
+        :root {
+            /* Core surfaces */
+            --bg:           #090604;
+            --bg2:          #0e0a06;
+            --surface:      #151009;
+            --surface2:     #1a130a;
+            --surface3:     #22180d;
+            --surface4:     #2a1e10;
+            --glass:        rgba(30, 20, 10, 0.72);
+
+            /* Text */
+            --text:         #ede4d4;
+            --text-2:       #c5b090;
+            --text-3:       #7a6045;
+            --text-ghost:   rgba(237, 228, 212, 0.08);
+
+            /* Gold spectrum */
+            --gold:         #c8862e;
+            --gold-lt:      #eaab50;
+            --gold-pale:    rgba(200, 134, 46, 0.10);
+            --gold-mist:    rgba(200, 134, 46, 0.06);
+            --gold-glow:    rgba(200, 134, 46, 0.20);
+            --gold-deep:    #8a5c18;
+            --gold-border:  rgba(200, 134, 46, 0.22);
+            --gold-border2: rgba(200, 134, 46, 0.14);
+
+            /* Copper accent */
+            --copper:       #b06840;
+            --copper-s:     rgba(176, 104, 64, 0.08);
+
+            /* Status */
+            --ok:           #4db866;
+            --ok-s:         rgba(77, 184, 102, 0.10);
+            --ok-b:         rgba(77, 184, 102, 0.22);
+            --danger:       #cc4a4a;
+            --danger-s:     rgba(204, 74, 74, 0.10);
+            --danger-b:     rgba(204, 74, 74, 0.22);
+
+            /* Lines */
+            --line:         rgba(200,134,46,0.06);
+            --line2:        rgba(200,134,46,0.12);
+            --line3:        rgba(200,134,46,0.20);
+            --line4:        rgba(200,134,46,0.30);
+
+            /* Ivory for QR */
+            --ivory:        #f8f3ea;
+
+            /* Radius */
+            --r-sm:  8px;
+            --r-md:  12px;
+            --r-lg:  18px;
+            --r-xl:  24px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Subtle paper grain ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            opacity: 0.9;
+        }
+
+        /* ── Scene lighting ── */
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 70% 55% at 100% -5%,  rgba(200,134,46,0.08) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 65% at -5% 100%, rgba(176,104,64,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 35% 40% at 50% 50%, rgba(200,134,46,0.03) 0%, transparent 70%);
+        }
+
+        /* ── Atmospheric orbs ── */
+        .orb { position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; }
+        .orb-1 {
+            width: 600px; height: 450px; top: -180px; right: -160px;
+            background: radial-gradient(circle, rgba(200,134,46,0.08) 0%, transparent 70%);
+            animation: drift1 22s ease-in-out infinite alternate;
+        }
+        .orb-2 {
+            width: 480px; height: 480px; bottom: -150px; left: -130px;
+            background: radial-gradient(circle, rgba(176,104,64,0.06) 0%, transparent 70%);
+            animation: drift2 28s ease-in-out infinite alternate;
+        }
+        .orb-3 {
+            width: 320px; height: 320px; top: 40%; right: 15%;
+            background: radial-gradient(circle, rgba(200,134,46,0.04) 0%, transparent 65%);
+            animation: drift1 35s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes drift1 {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(30px, 40px) scale(1.12); }
+        }
+        @keyframes drift2 {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(-25px, -35px) scale(1.08); }
+        }
+
+        /* ══ WRAPPER ══ */
+        .wrap {
+            position: relative; z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 52px 32px 100px;
+        }
+
+        /* ══════════════════════════════
+           HEADER
+        ══════════════════════════════ */
+        .site-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-bottom: 40px;
+            padding-bottom: 36px;
+            border-bottom: 1px solid var(--line3);
+            position: relative;
+            animation: slideDown 0.9s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        .site-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%, var(--gold-border) 20%,
+                var(--gold-lt) 50%,
+                var(--gold-border) 80%, transparent 100%);
+            opacity: 0.5;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 22px; }
+
+        .back-btn {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--gold-border);
+            color: var(--gold-lt);
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 0 0 5px var(--gold-mist), inset 0 1px 0 rgba(200,134,46,0.15);
+        }
+        .back-btn:hover {
+            background: var(--gold);
+            border-color: var(--gold-lt);
+            color: var(--bg);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 32px var(--gold-glow), 0 0 0 5px var(--gold-pale);
+        }
+
+        .header-eyebrow {
+            font-size: 0.58rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.26em;
+            color: var(--gold);
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .eyebrow-rule {
+            display: inline-block;
+            width: 32px; height: 1px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+        }
+        .eyebrow-rule.rev { background: linear-gradient(90deg, transparent, var(--gold)); }
+
+        .header-title {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            line-height: 1;
+            color: var(--text);
+        }
+        .header-title em {
+            font-style: italic;
+            background: linear-gradient(135deg, var(--gold-lt) 20%, var(--copper) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-sub {
+            margin-top: 10px;
+            font-size: 0.8rem; font-weight: 300;
+            color: var(--text-3);
+            letter-spacing: 0.06em;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        /* ── View Toggle ── */
+        .view-toggle {
+            display: inline-flex;
+            background: var(--surface2);
+            border: 1px solid var(--line3);
+            border-radius: var(--r-md);
+            overflow: hidden;
+            padding: 3px;
+            gap: 2px;
+        }
+        .view-btn {
+            padding: 8px 16px;
+            border: none; background: transparent;
+            cursor: pointer;
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.76rem; font-weight: 600;
+            color: var(--text-3);
+            display: flex; align-items: center; gap: 6px;
+            border-radius: var(--r-sm);
+            transition: all 0.22s;
+        }
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--gold-pale), rgba(200,134,46,0.16));
+            color: var(--gold-lt);
+            border: 1px solid var(--gold-border);
+            box-shadow: 0 0 16px var(--gold-mist);
+        }
+        .view-btn:hover:not(.active) {
+            background: rgba(237,228,212,0.05);
+            color: var(--text-2);
+        }
+
+        /* ══════════════════════════════
+           BUTTONS
+        ══════════════════════════════ */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 10px 20px;
+            border-radius: var(--r-md);
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; cursor: pointer; border: none;
+            white-space: nowrap;
+            transition: all 0.25s cubic-bezier(0.34,1.4,0.64,1);
+            position: relative;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, var(--gold-lt), var(--gold), var(--gold-deep));
+            background-size: 200% 200%;
+            background-position: 0% 50%;
+            color: #100806;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(200,134,46,0.30), inset 0 1px 0 rgba(255,255,255,0.15);
+            border: 1px solid rgba(200,134,46,0.5);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            background-position: 100% 50%;
+            box-shadow: 0 8px 32px rgba(200,134,46,0.42), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-outline {
+            background: transparent; color: var(--text-3);
+            border: 1px solid var(--line3);
+        }
+        .btn-outline:hover {
+            background: var(--gold-mist);
+            color: var(--text-2);
+            border-color: var(--gold-border);
+        }
+
+        .btn-request {
+            background: var(--ok-s); color: var(--ok);
+            border: 1px solid var(--ok-b);
+        }
+        .btn-request:hover {
+            background: var(--ok);
+            color: #021008;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(77,184,102,0.28);
+        }
+
+        .btn-edit {
+            background: var(--gold-pale); color: var(--gold-lt);
+            border: 1px solid var(--gold-border2);
+        }
+        .btn-edit:hover {
+            background: var(--gold);
+            color: var(--bg);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--gold-glow);
+        }
+
+        .btn-delete {
+            background: var(--danger-s); color: var(--danger);
+            border: 1px solid var(--danger-b);
+        }
+        .btn-delete:hover {
+            background: var(--danger);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(204,74,74,0.30);
+        }
+
+        .btn-muted {
+            background: var(--surface3); color: var(--text-3);
+            cursor: not-allowed;
+            border: 1px solid var(--line2);
+        }
+
+        /* ══════════════════════════════
+           SEARCH PANEL
+        ══════════════════════════════ */
+        .search-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--line3);
+            border-radius: var(--r-xl);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            position: relative; overflow: hidden;
+            animation: slideUp 0.8s 0.08s cubic-bezier(0.16,1,0.3,1) both;
+            box-shadow:
+                0 1px 0 rgba(200,134,46,0.12) inset,
+                0 32px 64px rgba(0,0,0,0.35);
+        }
+
+        /* Animated top border */
+        .search-panel::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg,
+                transparent, var(--gold-deep), var(--gold-lt), var(--gold), var(--gold-deep), transparent);
+            background-size: 300% 100%;
+            animation: borderShimmer 6s linear infinite;
+        }
+
+        /* Ghost watermark */
+        .search-panel::after {
+            content: 'SEARCH';
+            position: absolute; bottom: 4px; right: 24px;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 6rem; font-weight: 700;
+            color: var(--gold); opacity: 0.025;
+            letter-spacing: 0.12em; line-height: 1;
+            user-select: none; pointer-events: none;
+        }
+
+        @keyframes borderShimmer {
+            from { background-position: 0% 0%; }
+            to   { background-position: 300% 0%; }
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 16px; align-items: flex-end;
+            position: relative; z-index: 1;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.6rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.18em;
+            color: var(--text-3); margin-bottom: 8px;
+        }
+
+        input[type="text"], select {
+            width: 100%; padding: 12px 18px;
+            border-radius: var(--r-md);
+            border: 1px solid var(--line2);
+            background: rgba(10,7,4,0.55);
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.87rem; font-weight: 400;
+            color: var(--text); outline: none;
+            transition: all 0.22s;
+            appearance: none;
+            backdrop-filter: blur(8px);
+        }
+        input:focus, select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-pale), 0 0 16px var(--gold-mist);
+            background: rgba(200,134,46,0.04);
+        }
+        input::placeholder { color: var(--text-3); }
+        select option { background: #1a130a; }
+
+        /* ══════════════════════════════
+           STATS BAR
+        ══════════════════════════════ */
+        .stats-bar {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            margin-bottom: 24px;
+            animation: slideUp 0.8s 0.15s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .stat-pill {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 18px;
+            background: var(--surface2);
+            border: 1px solid var(--line2);
+            border-radius: 50px;
+            font-size: 0.78rem;
+        }
+        .stat-pill-icon {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+        }
+        .stat-pill-icon.gold { background: var(--gold-pale); color: var(--gold-lt); border: 1px solid var(--gold-border2); }
+        .stat-pill-icon.green { background: var(--ok-s); color: var(--ok); border: 1px solid var(--ok-b); }
+        .stat-pill-icon.red   { background: var(--danger-s); color: var(--danger); border: 1px solid var(--danger-b); }
+        .stat-pill-label { color: var(--text-3); font-weight: 400; font-size: 0.73rem; }
+        .stat-pill-value { color: var(--text); font-weight: 700; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+
+        /* ══════════════════════════════
+           TABLE CARD
+        ══════════════════════════════ */
+        .table-card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--line3);
+            border-radius: var(--r-xl);
+            overflow: hidden;
+            animation: slideUp 0.8s 0.22s cubic-bezier(0.16,1,0.3,1) both;
+            box-shadow:
+                0 1px 0 rgba(200,134,46,0.12) inset,
+                0 48px 80px rgba(0,0,0,0.55);
+        }
+
+        /* Top shimmer bar */
+        .table-card::before {
+            content: '';
+            display: block; height: 2px;
+            background: linear-gradient(90deg,
+                transparent, var(--gold-deep), var(--gold-lt), var(--gold), var(--gold-deep), transparent);
+            background-size: 300% 100%;
+            animation: borderShimmer 8s linear infinite reverse;
+        }
+
+        .table-scroll { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 740px; }
+
+        thead {
+            background: linear-gradient(180deg, var(--surface3), var(--surface2));
+            position: sticky; top: 0; z-index: 2;
+        }
+        thead::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--line4), transparent);
+        }
+
+        th {
+            padding: 14px 24px;
+            text-align: left;
+            font-size: 0.58rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            color: var(--text-3);
+            border-bottom: 1px solid var(--line2);
+            position: relative;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--line);
+            transition: background 0.18s, transform 0.18s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(200,134,46,0.04); }
+
+        td { padding: 20px 24px; vertical-align: middle; }
+
+        /* Book title cell */
+        .book-title-cell {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 0.95rem; font-weight: 700;
+            color: var(--text); line-height: 1.35;
+            margin-bottom: 4px;
+        }
+        .book-meta {
+            font-size: 0.75rem; color: var(--text-3);
+            margin-top: 4px; font-weight: 300;
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+
+        .isbn-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--surface3);
+            border: 1px solid var(--line2);
+            border-radius: 4px; padding: 2px 7px;
+            font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.06em;
+        }
+
+        .category-tag {
+            display: inline-flex; align-items: center;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+            background: var(--gold-pale);
+            border: 1px solid var(--gold-border2);
+            color: var(--gold-lt);
+        }
+
+        /* Availability */
+        .avail-yes {
+            display: inline-flex; align-items: center; gap: 7px;
+            color: var(--ok); font-weight: 600; font-size: 0.82rem;
+        }
+        .avail-no {
+            display: inline-flex; align-items: center; gap: 7px;
+            color: var(--danger); font-weight: 600; font-size: 0.82rem;
+        }
+        .avail-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+        .avail-yes .avail-dot {
+            background: var(--ok);
+            box-shadow: 0 0 6px rgba(77,184,102,0.6);
+            animation: pulse 2.4s infinite;
+        }
+        .avail-no .avail-dot { background: var(--danger); }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(77,184,102,0.55); }
+            50%       { box-shadow: 0 0 0 5px rgba(77,184,102,0); }
+        }
+
+        .action-cell { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+        /* Barcode */
+        .barcode-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .barcode-wrap {
+            background: var(--ivory);
+            border: 1px solid var(--line2);
+            border-radius: var(--r-sm);
+            padding: 5px;
+            width: 70px; height: 70px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .book-barcode { width: 100%; height: 100%; }
+        .barcode-code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.56rem; color: var(--text-3); letter-spacing: 0.08em;
+        }
+        .barcode-link {
+            font-size: 0.68rem; font-weight: 600; color: var(--gold);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(200,134,46,0.25);
+            transition: all 0.2s;
+        }
+        .barcode-link:hover { color: var(--gold-lt); border-color: var(--gold); }
+
+        /* ══════════════════════════════
+           GRID VIEW
+        ══════════════════════════════ */
+        .grid-view {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 22px;
+        }
+
+        .book-card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--line2);
+            border-radius: var(--r-xl);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.3s, border-color 0.3s;
+            animation: cardAppear 0.5s ease both;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        .book-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--gold-border);
+            box-shadow:
+                0 20px 48px rgba(0,0,0,0.55),
+                0 0 0 1px var(--gold-border2),
+                0 0 32px var(--gold-mist);
+        }
+
+        /* Spine glow on hover */
+        .card-spine {
+            position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+            background: linear-gradient(180deg, var(--gold-lt), var(--copper), var(--gold-deep));
+            opacity: 0; z-index: 2;
+            transition: opacity 0.3s;
+            border-radius: var(--r-xl) 0 0 var(--r-xl);
+        }
+        .book-card:hover .card-spine { opacity: 1; }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: scale(0.93) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .book-card:nth-child(1) { animation-delay: 0.04s; }
+        .book-card:nth-child(2) { animation-delay: 0.09s; }
+        .book-card:nth-child(3) { animation-delay: 0.14s; }
+        .book-card:nth-child(4) { animation-delay: 0.19s; }
+        .book-card:nth-child(5) { animation-delay: 0.24s; }
+        .book-card:nth-child(6) { animation-delay: 0.29s; }
+
+        /* Card cover area */
+        .card-cover {
+            padding: 28px 24px 20px;
+            background: var(--surface2);
+            position: relative; overflow: hidden;
+            min-height: 155px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* Woven grid lines */
+        .card-cover::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background-image:
+                repeating-linear-gradient(0deg,  transparent, transparent 28px, rgba(200,134,46,0.035) 28px, rgba(200,134,46,0.035) 29px),
+                repeating-linear-gradient(90deg, transparent, transparent 44px, rgba(200,134,46,0.018) 44px, rgba(200,134,46,0.018) 45px);
+        }
+
+        /* Radial glow reveal */
+        .card-cover::after {
+            content: '';
+            position: absolute; bottom: -50px; right: -50px;
+            width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,134,46,0.10) 0%, transparent 65%);
+            opacity: 0; transition: opacity 0.35s;
+        }
+        .book-card:hover .card-cover::after { opacity: 1; }
+
+        .cover-vol {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.56rem; letter-spacing: 0.22em;
+            color: var(--gold); text-transform: uppercase;
+            position: relative; z-index: 1;
+        }
+        .cover-genre {
+            font-size: 0.6rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            color: var(--gold-lt); opacity: 0.75;
+            margin-top: 6px; position: relative; z-index: 1;
+        }
+        .cover-title {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 1.08rem; font-weight: 700;
+            color: var(--text); line-height: 1.35;
+            position: relative; z-index: 1;
+        }
+
+        /* Big decorative initial */
+        .cover-deco {
+            position: absolute; bottom: -22px; right: 6px;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 9rem; font-style: italic; font-weight: 700;
+            color: rgba(200,134,46,0.045); line-height: 1;
+            user-select: none; pointer-events: none; z-index: 0;
+            transition: color 0.35s;
+        }
+        .book-card:hover .cover-deco { color: rgba(200,134,46,0.07); }
+
+        /* Divider rule with diamond */
+        .card-divider {
+            height: 1px; margin: 0;
+            background: linear-gradient(90deg, transparent, var(--line3), transparent);
+            position: relative;
+        }
+        .card-divider::before {
+            content: '◆';
+            position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+            font-size: 0.4rem; color: var(--gold);
+            background: var(--surface2);
+            padding: 0 5px;
+        }
+
+        .card-body { padding: 18px 22px; flex: 1; }
+
+        .card-author { font-size: 0.8rem; color: var(--text-3); font-weight: 300; line-height: 1.4; }
+        .card-author strong { color: var(--text-2); font-weight: 600; }
+
+        .card-isbn {
+            display: inline-block; margin-top: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.63rem; color: var(--text-3);
+            background: var(--surface3);
+            border: 1px solid var(--line2);
+            border-radius: 4px; padding: 2px 8px;
+        }
+
+        .card-avail { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+        .card-badge {
+            padding: 3px 9px; border-radius: 5px;
+            font-size: 0.6rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+        .badge-ok  {
+            background: var(--ok-s); color: var(--ok);
+            border: 1px solid var(--ok-b);
+        }
+        .badge-no  {
+            background: var(--danger-s); color: var(--danger);
+            border: 1px solid var(--danger-b);
+        }
+
+        /* Barcode in card */
+        .card-barcode-section {
+            margin-top: 14px; padding-top: 14px;
+            border-top: 1px dashed var(--line2);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .card-barcode-wrap {
+            background: var(--ivory); border-radius: var(--r-sm); padding: 4px;
+            width: 60px; height: 60px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--line2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .card-barcode-num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.58rem; color: var(--text-3);
+        }
+
+        /* Card footer */
+        .card-footer {
+            padding: 14px 20px;
+            background: var(--surface2);
+            border-top: 1px solid var(--line);
+            display: flex; gap: 8px;
+        }
+        .card-footer .btn { flex: 1; padding: 8px 10px; font-size: 0.78rem; }
+
+        /* ══════════════════════════════
+           EMPTY STATE
+        ══════════════════════════════ */
+        .empty-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 20px; gap: 14px; text-align: center;
+        }
+        .empty-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: var(--surface3);
+            border: 1px solid var(--line2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .empty-title {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 1.25rem; font-weight: 700; font-style: italic;
+            color: var(--text-3);
+        }
+        .empty-sub { font-size: 0.82rem; color: var(--text-3); opacity: 0.7; }
+
+        /* ══════════════════════════════
+           TABLE FOOTER
+        ══════════════════════════════ */
+        .table-footer {
+            padding: 14px 26px;
+            border-top: 1px solid var(--line2);
+            background: rgba(10,7,4,0.45);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .footer-text { font-size: 0.74rem; color: var(--text-3); }
+        .footer-text strong { color: var(--text-2); }
+        .footer-brand {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 0.68rem; font-style: italic;
+            color: var(--gold); letter-spacing: 0.06em; opacity: 0.7;
+        }
+
+        /* ══════════════════════════════
+           SCROLLBAR
+        ══════════════════════════════ */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold-deep); }
+
+        /* ══════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════ */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Row stagger */
+        tbody tr {
+            animation: rowSlide 0.42s ease both;
+        }
+        @keyframes rowSlide {
+            from { opacity: 0; transform: translateX(-10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        tbody tr:nth-child(1)  { animation-delay: 0.05s; }
+        tbody tr:nth-child(2)  { animation-delay: 0.10s; }
+        tbody tr:nth-child(3)  { animation-delay: 0.15s; }
+        tbody tr:nth-child(4)  { animation-delay: 0.20s; }
+        tbody tr:nth-child(5)  { animation-delay: 0.25s; }
+        tbody tr:nth-child(6)  { animation-delay: 0.30s; }
+        tbody tr:nth-child(7)  { animation-delay: 0.35s; }
+        tbody tr:nth-child(8)  { animation-delay: 0.40s; }
+
+        /* ══════════════════════════════
+           UTILITY
+        ══════════════════════════════ */
+        .hidden { display: none !important; }
+        .grid-active { display: grid !important; }
+        .sep { color: var(--line4); }
+
+        /* ══════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════ */
+        @media (max-width: 880px) {
+            .search-grid { grid-template-columns: 1fr; }
+            .site-header { flex-direction: column; align-items: flex-start; }
+            .header-title { font-size: 2.4rem; }
+            .header-right { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; }
+            .header-right .btn { flex: 1; min-width: 140px; justify-content: center; }
+            .stats-bar { display: none; }
+        }
+        @media (max-width: 540px) {
+            .wrap { padding: 28px 16px 60px; }
+            .header-title { font-size: 2rem; }
+            .search-panel { padding: 20px 18px; }
+            .view-toggle { width: 100%; }
+            .view-btn { flex: 1; justify-content: center; }
+            .table-scroll { -webkit-overflow-scrolling: touch; }
+            table { min-width: 620px; }
+            .header-right .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="site-header">
+        <div class="header-left">
+            <a href="{% url 'dashboard' %}" class="back-btn" title="Dashboard">&#8592;</a>
+            <div>
+                <div class="header-eyebrow">
+                    <span class="eyebrow-rule"></span>
+                    Collection
+                    <span class="eyebrow-rule rev"></span>
+                </div>
+                <h1 class="header-title">Library <em>Catalog</em></h1>
+                <p class="header-sub">
+                    {{ books|length }} volume{{ books|length|pluralize }} in the collection
+                </p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('table',this)">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    Table
+                </button>
+                <button class="view-btn" onclick="switchView('grid',this)">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                    Grid
+                </button>
+            </div>
+            {% if is_librarian %}
+            <a href="{% url 'book_create' %}" class="btn btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Add Volume
+            </a>
+            <a href="{% url 'book_requests' %}" class="btn btn-outline">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Requests
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- ═══════════════ STATS BAR ═══════════════ -->
+    <div class="stats-bar">
+        <div class="stat-pill">
+            <div class="stat-pill-icon gold">&#9679;</div>
+            <span class="stat-pill-label">Total Volumes</span>
+            <span class="stat-pill-value">{{ books|length }}</span>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon green">&#10003;</div>
+            <span class="stat-pill-label">Available</span>
+            <span class="stat-pill-value">{{ books|length }}</span>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon gold">&#9682;</div>
+            <span class="stat-pill-label">Genres</span>
+            <span class="stat-pill-value">{{ categories|length }}</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════ SEARCH ═══════════════ -->
+    <div class="search-panel">
+        <form method="get" class="search-grid">
+            <div>
+                <label class="field-label">Search Collection</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="Title, author, or ISBN…" />
+            </div>
+            <div>
+                <label class="field-label">Genre</label>
+                <select name="category">
+                    <option value="">All Genres</option>
+                    {% for c in categories %}
+                    <option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="field-label">&nbsp;</label>
+                <button class="btn btn-primary" type="submit" style="height:46px;width:120px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ═══════════════ TABLE VIEW ═══════════════ -->
+    <div id="tableView" class="table-card">
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title &amp; Author</th>
+                        <th>Genre</th>
+                        <th>Availability</th>
+                        {% if is_librarian %}<th>Barcode</th>{% endif %}
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>
+                        <div class="book-title-cell">{{ book.title }}</div>
+                        <div class="book-meta">
+                            <span>{{ book.author }}</span>
+                            <span class="sep">·</span>
+                            <span class="isbn-tag">{{ book.isbn }}</span>
+                        </div>
+                    </td>
+                    <td><span class="category-tag">{{ book.category }}</span></td>
+                    <td>
+                        {% if book.available_copies > 0 %}
+                        <span class="avail-yes"><span class="avail-dot"></span>{{ book.available_copies }} Available</span>
+                        {% else %}
+                        <span class="avail-no"><span class="avail-dot"></span>Out of Stock</span>
+                        {% endif %}
+                    </td>
+                    {% if is_librarian %}
+                    <td>
+                        <div class="barcode-box">
+                            <div class="barcode-wrap">
+                                <div class="book-barcode"
+                                     data-barcode="{{ book.barcode_number }}"
+                                     data-target="{{ request.scheme }}://{{ request.get_host }}{% url 'book_barcode_detail' book.barcode_number %}">
+                                </div>
+                            </div>
+                            <span class="barcode-code">{{ book.barcode_number }}</span>
+                            <a href="{% url 'book_barcode_detail' book.barcode_number %}" class="barcode-link">View →</a>
+                        </div>
+                    </td>
+                    {% endif %}
+                    <td>
+                        <div class="action-cell">
+                            {% if is_librarian %}
+                                <a href="{% url 'book_update' book.pk %}" class="btn btn-edit" style="padding:7px 14px;font-size:0.76rem;">Edit</a>
+                                <a href="{% url 'book_delete' book.pk %}" class="btn btn-delete" style="padding:7px 14px;font-size:0.76rem;">Delete</a>
+                            {% elif is_student %}
+                                {% if book.id in pending_request_book_ids %}
+                                    <span class="btn btn-muted" style="padding:7px 14px;font-size:0.76rem;">Requested</span>
+                                {% else %}
+                                    <form method="post" action="{% url 'request_book' book.pk %}" style="margin:0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-request" style="padding:7px 14px;font-size:0.76rem;">Request</button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-title">No volumes found</div>
+                        <div class="empty-sub">Try adjusting your search or browse all genres.</div>
+                    </div>
+                </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if books %}
+        <div class="table-footer">
+            <span class="footer-text">Showing <strong>{{ books|length }}</strong> volume{{ books|length|pluralize }}</span>
+            <span class="footer-brand">Library Management System</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ═══════════════ GRID VIEW ═══════════════ -->
+    <div id="gridView" class="grid-view">
+        {% for book in books %}
+        <div class="book-card">
+            <div class="card-spine"></div>
+            <div class="card-cover">
+                <div class="cover-deco">{{ book.title|slice:":1"|upper }}</div>
+                <div>
+                    <div class="cover-vol">Vol. {{ forloop.counter }}</div>
+                    <div class="cover-genre">{{ book.category }}</div>
+                </div>
+                <div class="cover-title">{{ book.title }}</div>
+            </div>
+            <div class="card-divider"></div>
+            <div class="card-body">
+                <div class="card-author">by <strong>{{ book.author }}</strong></div>
+                <span class="card-isbn">{{ book.isbn }}</span>
+                <div class="card-avail">
+                    {% if book.available_copies > 0 %}
+                    <span class="avail-yes"><span class="avail-dot"></span>{{ book.available_copies }} Available</span>
+                    <span class="card-badge badge-ok">In Stock</span>
+                    {% else %}
+                    <span class="avail-no"><span class="avail-dot"></span>Out of Stock</span>
+                    <span class="card-badge badge-no">Reserved</span>
+                    {% endif %}
+                </div>
+                {% if is_librarian %}
+                <div class="card-barcode-section">
+                    <div class="card-barcode-wrap">
+                        <div class="book-barcode"
+                             data-barcode="{{ book.barcode_number }}"
+                             data-target="{{ request.scheme }}://{{ request.get_host }}{% url 'book_barcode_detail' book.barcode_number %}">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card-barcode-num">{{ book.barcode_number }}</div>
+                        <a href="{% url 'book_barcode_detail' book.barcode_number %}" class="barcode-link" style="font-size:0.66rem;">View Details →</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                {% if is_librarian %}
+                    <a href="{% url 'book_update' book.pk %}" class="btn btn-edit">Edit</a>
+                    <a href="{% url 'book_delete' book.pk %}" class="btn btn-delete">Delete</a>
+                {% elif is_student %}
+                    {% if book.id in pending_request_book_ids %}
+                        <span class="btn btn-muted">Requested</span>
+                    {% else %}
+                        <form method="post" action="{% url 'request_book' book.pk %}" style="flex:1;margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-request" style="width:100%;">Request Book</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column:1/-1;">
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div class="empty-title">No volumes found</div>
+                <div class="empty-sub">Try adjusting your search or browse all genres.</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% if is_librarian %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+{% endif %}
+
+<script>
+    function switchView(type, btn) {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tbl  = document.getElementById('tableView');
+        const grid = document.getElementById('gridView');
+        if (type === 'grid') {
+            tbl.classList.add('hidden');
+            grid.classList.add('grid-active');
+        } else {
+            tbl.classList.remove('hidden');
+            grid.classList.remove('grid-active');
+        }
+        setTimeout(renderQR, 80);
+    }
+
+    function renderQR() {
+        if (!window.QRCode) return;
+        document.querySelectorAll('.book-barcode').forEach(node => {
+            if (node.dataset.rendered) return;
+            const txt = node.dataset.target || node.dataset.barcode;
+            if (!txt) return;
+            node.innerHTML = '';
+            try {
+                new QRCode(node, {
+                    text: txt, width: 58, height: 58,
+                    correctLevel: QRCode.CorrectLevel.H,
+                    colorDark: '#090604', colorLight: '#f8f3ea'
+                });
+                node.dataset.rendered = 'true';
+            } catch(e) {}
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderQR);
+</script>
+</body>
+</html>

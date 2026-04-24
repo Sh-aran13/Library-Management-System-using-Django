@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Request Book Renewal | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:          #06080e;
+            --surface:     #0b1018;
+            --surface2:    #0f1624;
+            --surface3:    #172030;
+            --text:        #d4e8f0;
+            --text-dim:    #3e5468;
+            --line:        rgba(255,255,255,0.055);
+            --line2:       rgba(255,255,255,0.10);
+            --teal:        #2dd4bf;
+            --teal-g:      rgba(45,212,191,0.22);
+            --teal-s:      rgba(45,212,191,0.08);
+            --teal-line:   rgba(45,212,191,0.28);
+            --teal-deep:   #0d9488;
+            --green:       #34d399;
+            --danger:      #f87171;
+            --danger-s:    rgba(248,113,113,0.10);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 10%  5%,  rgba(45,212,191,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 55% at 90% 95%, rgba(13,148,136,0.09)  0%, transparent 55%),
+                radial-gradient(ellipse 40% 35% at 50% 50%, rgba(45,212,191,0.04)  0%, transparent 65%);
+            pointer-events: none; z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none; z-index: 0; opacity: 0.6;
+        }
+
+        .orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+        .orb-1 { width:460px;height:460px; top:-140px;left:-120px;   background:rgba(45,212,191,0.10); animation:drift 22s ease-in-out infinite alternate; }
+        .orb-2 { width:360px;height:360px; bottom:-100px;right:-80px; background:rgba(13,148,136,0.08); animation:drift 28s ease-in-out infinite alternate-reverse; }
+        @keyframes drift { from{transform:translate(0,0)scale(1)} to{transform:translate(28px,36px)scale(1.1)} }
+
+        .container {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 520px;
+            animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes cardIn {
+            from { opacity:0; transform:translateY(28px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--teal-line);
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(45,212,191,0.06),
+                0 40px 80px rgba(0,0,0,0.5),
+                0 0 60px rgba(45,212,191,0.05);
+        }
+
+        .card::before {
+            content: '';
+            display: block; height: 4px;
+            background: linear-gradient(90deg, var(--teal), var(--teal-deep), #6366f1, var(--teal));
+            background-size: 300% 100%;
+            animation: barShift 6s ease-in-out infinite alternate;
+        }
+        @keyframes barShift { from{background-position:0%} to{background-position:100%} }
+
+        .card-head {
+            position: relative;
+            padding: 30px 34px 24px;
+            overflow: hidden;
+        }
+        .card-head::before {
+            content: '';
+            position: absolute;
+            top: -60px; left: 50%; transform: translateX(-50%);
+            width: 320px; height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(45,212,191,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center; gap: 7px;
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 0.82rem; font-weight: 700;
+            padding: 7px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--line2);
+            background: var(--surface2);
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            margin-bottom: 22px;
+            position: relative; z-index: 1;
+        }
+        .back-link:hover {
+            background: var(--teal); border-color: var(--teal);
+            color: #021810;
+            transform: translateX(-3px);
+            box-shadow: 0 6px 18px var(--teal-g);
+        }
+        .back-link svg { transition: transform 0.2s; }
+        .back-link:hover svg { transform: translateX(-2px); }
+
+        .head-icon {
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            width: 58px; height: 58px;
+            border-radius: 17px;
+            background: var(--teal-s);
+            border: 1px solid var(--teal-line);
+            box-shadow: 0 0 24px var(--teal-g);
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            position: relative; z-index: 1;
+        }
+
+        .card-title {
+            font-size: 1.8rem; font-weight: 900;
+            letter-spacing: -0.04em; line-height: 1.1;
+            color: var(--text);
+            position: relative; z-index: 1;
+        }
+        .card-title em { font-style: normal; color: var(--teal); }
+
+        .card-sub {
+            font-size: 0.84rem; color: var(--text-dim);
+            margin-top: 7px; line-height: 1.6;
+            position: relative; z-index: 1;
+        }
+
+        .head-divider {
+            height: 1px; margin: 0 34px;
+            background: linear-gradient(90deg, transparent, var(--teal-line), transparent);
+        }
+
+        .card-body { padding: 26px 34px 34px; }
+
+        .error-banner {
+            display: flex; align-items: flex-start; gap: 10px;
+            background: var(--danger-s);
+            border: 1px solid rgba(248,113,113,0.22);
+            border-radius: 13px;
+            padding: 13px 16px; margin-bottom: 20px;
+            font-size: 0.82rem; font-weight: 700; color: var(--danger);
+        }
+        .error-banner::before { content:'⚠'; flex-shrink:0; }
+        .errorlist { list-style:none; }
+        .errorlist li { margin: 3px 0; }
+
+        .book-panel {
+            background: var(--surface2);
+            border: 1px solid var(--teal-line);
+            border-radius: 18px; padding: 20px; margin-bottom: 20px;
+            position: relative; overflow: hidden;
+        }
+        .book-panel::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, var(--teal), var(--teal-deep));
+            opacity: 0.5;
+        }
+
+        .book-panel-label {
+            font-size: 0.62rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.16em;
+            color: var(--teal); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .book-panel-label::before {
+            content: ''; width: 14px; height: 2px;
+            background: var(--teal); border-radius: 2px;
+        }
+
+        .detail-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 0; border-bottom: 1px solid var(--line); gap: 12px;
+        }
+        .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .detail-label {
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-dim); flex-shrink: 0;
+        }
+        .detail-value { font-size: 0.88rem; font-weight: 700; color: var(--text); text-align: right; }
+        .detail-value.mono { font-family: 'Geist Mono', monospace; font-size: 0.8rem; }
+        .detail-value.green {
+            color: var(--green);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .detail-value.green::before { content:'+'; font-weight:900; }
+
+        .info-notice {
+            background: var(--teal-s);
+            border: 1px solid rgba(45,212,191,0.18);
+            border-radius: 14px; padding: 14px 16px; margin-bottom: 22px;
+            font-size: 0.82rem; color: rgba(45,212,191,0.85);
+            line-height: 1.6; display: flex; gap: 10px; align-items: flex-start;
+        }
+        .info-notice-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+        .info-notice strong { color: var(--teal); font-weight: 800; display: block; margin-bottom: 3px; }
+
+        .form-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            font-size: 0.67rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--text-dim); margin-bottom: 8px;
+        }
+
+        textarea, input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 13px 16px; border-radius: 13px;
+            border: 1px solid var(--line2); background: var(--surface2);
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.9rem; font-weight: 500; color: var(--text);
+            outline: none; resize: vertical;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        textarea { min-height: 100px; }
+        textarea::placeholder, input::placeholder { color: var(--text-dim); }
+        textarea:focus, input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px var(--teal-g);
+            background: rgba(45,212,191,0.05);
+        }
+
+        .form-help { font-size: 0.73rem; color: var(--text-dim); margin-top: 7px; line-height: 1.5; }
+
+        .field-error {
+            display: flex; align-items: center; gap: 5px;
+            color: var(--danger); font-size: 0.76rem; font-weight: 700;
+            margin-top: 7px;
+            background: var(--danger-s);
+            border: 1px solid rgba(248,113,113,0.18);
+            border-radius: 8px; padding: 5px 10px;
+        }
+        .field-error::before { content:'⚠'; font-size:0.75rem; }
+
+        .btn-group {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 14px 22px; border-radius: 14px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.88rem; font-weight: 800;
+            cursor: pointer; border: none; text-decoration: none;
+            position: relative; overflow: hidden;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .btn::after {
+            content: '';
+            position: absolute; top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            transform: skewX(-18deg);
+            transition: left 0.5s ease;
+        }
+        .btn:hover::after { left: 160%; }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+            color: #021810;
+            box-shadow: 0 6px 22px var(--teal-g);
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(45,212,191,0.38); }
+        .btn-submit:active { transform: translateY(0); }
+
+        .btn-cancel {
+            background: var(--surface2); color: var(--text-dim);
+            border: 1px solid var(--line2);
+        }
+        .btn-cancel:hover { background: var(--surface3); color: var(--text); }
+
+        /* Stagger */
+        .back-link   { animation: fadeUp 0.5s 0.10s ease both; }
+        .head-icon   { animation: fadeUp 0.5s 0.15s ease both; }
+        .card-title  { animation: fadeUp 0.5s 0.18s ease both; }
+        .card-sub    { animation: fadeUp 0.5s 0.21s ease both; }
+        .book-panel  { animation: fadeUp 0.5s 0.26s ease both; }
+        .info-notice { animation: fadeUp 0.5s 0.31s ease both; }
+        .form-group  { animation: fadeUp 0.5s 0.36s ease both; }
+        .btn-group   { animation: fadeUp 0.5s 0.40s ease both; }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(16px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:4px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--teal); }
+
+        @media (max-width:520px) {
+            .card-head, .card-body { padding-left:22px; padding-right:22px; }
+            .head-divider { margin:0 22px; }
+            .card-title { font-size:1.5rem; }
+            .btn-group { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="container">
+    <div class="card">
+
+        <div class="card-head">
+            <a href="{% url 'manage_issues' %}" class="back-link">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <div class="card-title">Request <em>Renewal</em></div>
+            <p class="card-sub">Extend your borrowing period for this book.</p>
+        </div>
+
+        <div class="head-divider"></div>
+
+        <div class="card-body">
+
+            {% if form.non_field_errors %}
+            <div class="error-banner">
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="book-panel">
+                <div class="book-panel-label">Book Details</div>
+                <div class="detail-row">
+                    <span class="detail-label">Title</span>
+                    <span class="detail-value">{{ issue.book.title }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Author</span>
+                    <span class="detail-value">{{ issue.book.author }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Due Date</span>
+                    <span class="detail-value mono">{{ issue.due_date|date:"d M Y" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">After Approval</span>
+                    <span class="detail-value green">14 days extension</span>
+                </div>
+            </div>
+
+            <div class="info-notice">
+                <span class="info-notice-icon">📚</span>
+                <div>
+                    <strong>Renewal Information</strong>
+                    If approved, your due date will be extended by 14 additional days, giving you more time to complete reading.
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+                    {{ form.reason }}
+                    {% if form.reason.errors %}
+                        {% for error in form.reason.errors %}
+                        <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="form-help">Optional — tell the librarian why you need an extension (e.g., "Still reading" or "Need more time").</p>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{% url 'manage_issues' %}" class="btn btn-cancel">Cancel</a>
+                    <button type="submit" class="btn btn-submit">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

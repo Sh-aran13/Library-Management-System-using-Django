@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issue Book | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #060b12;
+            --surface:   #0b1120;
+            --surface2:  #101828;
+            --surface3:  #162034;
+            --text:      #d8eaf8;
+            --text-dim:  #445568;
+            --line:      rgba(255,255,255,0.06);
+            --line2:     rgba(255,255,255,0.10);
+            --cyan:      #06b6d4;
+            --cyan-g:    rgba(6,182,212,0.22);
+            --cyan-s:    rgba(6,182,212,0.08);
+            --cyan-line: rgba(6,182,212,0.28);
+            --teal:      #14b8a6;
+            --danger:    #f87171;
+            --danger-s:  rgba(248,113,113,0.10);
+            --ok:        #34d399;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── Mesh ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 10%  0%,   rgba(6,182,212,0.13)  0%, transparent 55%),
+                radial-gradient(ellipse 50% 55% at 90% 100%,  rgba(20,184,166,0.09) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 35% at 50%  50%,  rgba(6,182,212,0.04)  0%, transparent 65%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── Scanlines ── */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: repeating-linear-gradient(
+                0deg, transparent, transparent 3px,
+                rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
+            );
+            pointer-events: none; z-index: 0; opacity: 0.4;
+        }
+
+        /* ── Orbs ── */
+        .orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+        .orb-1 { width:500px;height:500px; top:-160px;left:-130px;    background:rgba(6,182,212,0.10);  animation:drift 22s ease-in-out infinite alternate; }
+        .orb-2 { width:380px;height:380px; bottom:-110px;right:-90px;  background:rgba(20,184,166,0.08); animation:drift 30s ease-in-out infinite alternate-reverse; }
+        @keyframes drift { from{transform:translate(0,0)scale(1)} to{transform:translate(28px,38px)scale(1.1)} }
+
+        /* ════════════
+           STICKY HEADER
+        ════════════ */
+        .site-header {
+            position: sticky; top: 0; z-index: 100;
+            padding: 14px 24px;
+            background: rgba(6,11,18,0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--line2);
+            display: flex;
+            align-items: center;
+            animation: fadeDown 0.6s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--line2);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 700;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .back-btn:hover {
+            background: var(--cyan);
+            border-color: var(--cyan);
+            color: #021018;
+            transform: translateX(-3px);
+            box-shadow: 0 6px 20px var(--cyan-g);
+        }
+        .back-btn svg { transition: transform 0.2s; }
+        .back-btn:hover svg { transform: translateX(-2px); }
+
+        /* ════════════
+           WRAP
+        ════════════ */
+        .wrap {
+            position: relative; z-index: 1;
+            max-width: 560px;
+            margin: auto;
+            width: 100%;
+            padding: 44px 20px 80px;
+            animation: fadeUp 0.7s 0.08s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        /* ════════════
+           CARD
+        ════════════ */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--cyan-line);
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(6,182,212,0.06),
+                0 40px 80px rgba(0,0,0,0.45);
+            position: relative;
+        }
+
+        /* Top gradient accent */
+        .card::before {
+            content: '';
+            display: block;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--teal), #818cf8);
+            background-size: 200% 100%;
+            animation: lineShift 6s ease-in-out infinite alternate;
+        }
+        @keyframes lineShift { from{background-position:0%} to{background-position:100%} }
+
+        /* ── Card header zone ── */
+        .card-head {
+            position: relative;
+            padding: 36px 36px 28px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Dot grid */
+        .card-head::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        /* Radial glow behind title */
+        .card-head::after {
+            content: '';
+            position: absolute;
+            top: -40px; left: 50%;
+            transform: translateX(-50%);
+            width: 280px; height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(6,182,212,0.14) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Icon badge */
+        .head-icon {
+            position: relative; z-index: 1;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            background: var(--cyan-s);
+            border: 1px solid var(--cyan-line);
+            box-shadow: 0 0 28px var(--cyan-g);
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            font-size: 1.85rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            position: relative; z-index: 1;
+            line-height: 1.1;
+        }
+        .card-title em {
+            font-style: normal;
+            color: var(--cyan);
+        }
+
+        .card-sub {
+            font-size: 0.84rem;
+            color: var(--text-dim);
+            margin-top: 8px;
+            line-height: 1.65;
+            position: relative; z-index: 1;
+        }
+
+        /* Info chips row */
+        .chips-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            position: relative; z-index: 1;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 13px;
+            border-radius: 99px;
+            font-size: 0.71rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .chip-cyan {
+            background: var(--cyan-s);
+            border: 1px solid rgba(6,182,212,0.22);
+            color: var(--cyan);
+        }
+        .chip-cyan::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+            animation: blink 2s ease-in-out infinite;
+        }
+        .chip-ok {
+            background: rgba(52,211,153,0.09);
+            border: 1px solid rgba(52,211,153,0.2);
+            color: var(--ok);
+        }
+        .chip-ok::before {
+            content: '₹';
+            font-size: 0.7rem;
+        }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+        /* Request notice */
+        .request-notice {
+            margin: 16px 0 0;
+            padding: 12px 16px;
+            background: rgba(6,182,212,0.07);
+            border: 1px solid rgba(6,182,212,0.18);
+            border-radius: 12px;
+            font-size: 0.83rem;
+            color: rgba(6,182,212,0.9);
+            line-height: 1.5;
+            position: relative; z-index: 1;
+            text-align: left;
+        }
+        .request-notice strong { color: var(--text); }
+
+        /* Divider */
+        .head-divider {
+            height: 1px;
+            margin: 0 36px;
+            background: linear-gradient(90deg, transparent, var(--cyan-line), transparent);
+        }
+
+        /* ── Form body ── */
+        .card-body { padding: 28px 36px 36px; }
+
+        .field-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 0.67rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 13px;
+            border: 1px solid var(--line2);
+            background: var(--surface2);
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.2s;
+        }
+        input::placeholder { color: var(--text-dim); }
+        input[readonly] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        input:not([readonly]):focus,
+        select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px var(--cyan-g);
+            background: rgba(6,182,212,0.05);
+            transform: translateY(-1px);
+        }
+
+        .err-msg {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--danger);
+            font-size: 0.76rem;
+            font-weight: 700;
+            margin-top: 7px;
+            background: var(--danger-s);
+            border: 1px solid rgba(248,113,113,0.18);
+            border-radius: 9px;
+            padding: 6px 11px;
+        }
+        .err-msg::before { content: '⚠'; font-size: 0.8rem; }
+
+        /* ── Buttons ── */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        /* Shimmer */
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            transform: skewX(-18deg);
+            transition: left 0.5s ease;
+        }
+        .btn:hover::after { left: 160%; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--teal));
+            color: #021018;
+            box-shadow: 0 6px 22px var(--cyan-g);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(6,182,212,0.38);
+        }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--text-dim);
+            border: 1px solid var(--line2);
+        }
+        .btn-ghost:hover {
+            background: var(--surface3);
+            color: var(--text);
+            border-color: var(--line2);
+        }
+
+        /* ════════════
+           ANIMATIONS
+        ════════════ */
+        @keyframes fadeDown {
+            from { opacity:0; transform:translateY(-14px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(22px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:4px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--cyan); }
+
+        @media (max-width:520px) {
+            .site-header { padding: 10px 12px; }
+            .back-btn { width: 100%; justify-content: center; }
+            .wrap { padding: 24px 14px 46px; }
+            .card-head, .card-body { padding-left:22px; padding-right:22px; }
+            .head-divider { margin:0 22px; }
+            .card-title { font-size:1.5rem; }
+            .btn-row { flex-direction:column; }
+            .btn { width: 100%; justify-content: center; }
+            input, select, textarea { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- ── Sticky header ── -->
+<header class="site-header">
+    <a class="back-btn" href="{% url 'dashboard' %}">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Dashboard
+    </a>
+</header>
+
+<!-- ── Form ── -->
+<div class="wrap">
+    <form class="card" method="post">
+        {% csrf_token %}
+
+        <!-- Card head -->
+        <div class="card-head">
+            <div class="head-icon">
+                <svg width="28" height="28" fill="none" stroke="#06b6d4" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <div class="card-title">Issue <em>Book</em></div>
+            <p class="card-sub">Assign a student to a book copy.<br>Due period is fixed at 14 days.</p>
+
+            <div class="chips-row">
+                <span class="chip chip-cyan">14 Days Fixed</span>
+                <span class="chip chip-ok">₹2 / day fine</span>
+            </div>
+
+            {% if book_request %}
+            <div class="request-notice">
+                Issuing from request by <strong>{{ book_request.member.username }}</strong>
+                for <strong>{{ book_request.book.title }}</strong>.
+            </div>
+            <input type="hidden" name="request_id" value="{{ book_request.id }}" />
+            {% endif %}
+        </div>
+
+        <div class="head-divider"></div>
+
+        <!-- Form fields -->
+        <div class="card-body">
+            {% for field in form %}
+            <div class="field-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if book_request and field.name == 'member' %}
+                    <input type="text" value="{{ book_request.member.username }}" readonly />
+                {% elif book_request and field.name == 'book' %}
+                    <input type="text" value="{{ book_request.book.title }}" readonly />
+                {% else %}
+                    {{ field }}
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="err-msg">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="btn-row">
+                <button class="btn btn-primary" type="submit">
+                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Issue Book
+                </button>
+                <a class="btn btn-ghost" href="{% url 'dashboard' %}">Cancel</a>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>

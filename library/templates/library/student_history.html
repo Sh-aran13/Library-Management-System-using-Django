@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Borrowing History | LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #06080f;
+            --surface:   #0d1120;
+            --surface2:  #111827;
+            --surface3:  #172033;
+            --text:      #dde3f5;
+            --text-dim:  #5d6b8c;
+            --line:      rgba(255,255,255,0.06);
+            --line2:     rgba(255,255,255,0.10);
+            --violet:    #7c6af5;
+            --violet-g:  rgba(124,106,245,0.20);
+            --violet-s:  rgba(124,106,245,0.08);
+            --cyan:      #22d3ee;
+            --cyan-s:    rgba(34,211,238,0.08);
+            --ok:        #34d399;
+            --ok-s:      rgba(52,211,153,0.10);
+            --danger:    #fb7185;
+            --danger-s:  rgba(251,113,133,0.10);
+            --gold:      #fbbf24;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── Ambient mesh ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 65% 45% at 10%  0%,  rgba(124,106,245,0.13) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 55% at 90% 100%, rgba(34,211,238,0.09)  0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 55%  50%, rgba(124,106,245,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Floating orbs ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 { width:500px; height:500px; top:-180px; left:-140px; background:rgba(124,106,245,0.09); animation:drift 22s ease-in-out infinite alternate; }
+        .orb-2 { width:360px; height:360px; bottom:-100px; right:-100px; background:rgba(34,211,238,0.07); animation:drift 28s ease-in-out infinite alternate-reverse; }
+
+        @keyframes drift {
+            from { transform:translate(0,0) scale(1); }
+            to   { transform:translate(35px,45px) scale(1.12); }
+        }
+
+        /* ════════════════════
+           WRAP
+        ════════════════════ */
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 44px 22px 80px;
+        }
+
+        /* ════════════════════
+           TOP NAV ROW
+        ════════════════════ */
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 40px;
+            animation: fadeDown 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        /* Left: title block */
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--violet);
+            margin-bottom: 10px;
+        }
+        .eyebrow-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--violet);
+            box-shadow: 0 0 8px var(--violet);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.5; transform:scale(1.3); }
+        }
+
+        .page-title {
+            font-family: 'Fraunces', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+            color: var(--text);
+        }
+        .page-title em {
+            font-style: italic;
+            color: var(--violet);
+        }
+
+        .page-sub {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-weight: 400;
+            max-width: 360px;
+            line-height: 1.6;
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 20px;
+            border-radius: 14px;
+            background: var(--surface);
+            border: 1px solid var(--line2);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.86rem;
+            font-weight: 700;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+        .back-btn:hover {
+            background: var(--violet);
+            border-color: var(--violet);
+            color: #fff;
+            transform: translateX(-3px);
+            box-shadow: 0 8px 24px rgba(124,106,245,0.35);
+        }
+        .back-btn svg { transition: transform 0.2s; }
+        .back-btn:hover svg { transform: translateX(-2px); }
+
+        /* ════════════════════
+           SUMMARY CHIPS
+        ════════════════════ */
+        .summary-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            animation: fadeUp 0.7s 0.08s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--line2);
+            background: var(--surface);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            transition: all 0.2s;
+        }
+        .chip:hover { border-color: var(--violet); color: var(--text); }
+        .chip-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+        .chip-num { font-weight: 800; color: var(--text); font-size: 0.9rem; }
+
+        /* ════════════════════
+           TABLE CARD
+        ════════════════════ */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--line2);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(124,106,245,0.06),
+                0 30px 60px rgba(0,0,0,0.4);
+            animation: fadeUp 0.7s 0.14s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        /* Top accent line */
+        .table-card::before {
+            content: '';
+            display: block;
+            height: 3px;
+            background: linear-gradient(90deg, var(--violet), var(--cyan), var(--ok));
+            background-size: 200% 100%;
+            animation: lineShift 6s ease-in-out infinite alternate;
+        }
+        @keyframes lineShift {
+            from { background-position: 0%; }
+            to   { background-position: 100%; }
+        }
+
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 720px; }
+
+        /* ── Head ── */
+        thead { background: var(--surface2); }
+        th {
+            padding: 15px 20px;
+            text-align: left;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        /* ── Body ── */
+        tbody tr {
+            border-bottom: 1px solid var(--line);
+            transition: background 0.16s;
+            animation: rowIn 0.45s ease both;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface2); }
+
+        @keyframes rowIn {
+            from { opacity:0; transform:translateX(-10px); }
+            to   { opacity:1; transform:translateX(0); }
+        }
+
+        /* Stagger rows */
+        tbody tr:nth-child(1)  { animation-delay:0.06s; }
+        tbody tr:nth-child(2)  { animation-delay:0.11s; }
+        tbody tr:nth-child(3)  { animation-delay:0.16s; }
+        tbody tr:nth-child(4)  { animation-delay:0.21s; }
+        tbody tr:nth-child(5)  { animation-delay:0.26s; }
+        tbody tr:nth-child(6)  { animation-delay:0.31s; }
+        tbody tr:nth-child(7)  { animation-delay:0.36s; }
+        tbody tr:nth-child(8)  { animation-delay:0.41s; }
+
+        td { padding: 18px 20px; vertical-align: middle; }
+
+        /* ── Book title cell ── */
+        .book-cell { display: flex; align-items: center; gap: 13px; }
+        .book-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--violet), #9c6af5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(124,106,245,0.3);
+        }
+        .book-title {
+            font-weight: 700;
+            font-size: 0.93rem;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        /* ── Date cell ── */
+        .date-main { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+        .date-rel  { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+        .badge-ok {
+            background: var(--ok-s);
+            color: var(--ok);
+            border: 1px solid rgba(52,211,153,0.18);
+        }
+        .badge-ok .badge-dot { background:var(--ok); }
+
+        .badge-danger {
+            background: var(--danger-s);
+            color: var(--danger);
+            border: 1px solid rgba(251,113,133,0.18);
+        }
+        .badge-danger .badge-dot { background:var(--danger); animation:blink 1.5s infinite; }
+
+        @keyframes blink {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.3; }
+        }
+
+        /* ── Fine cell ── */
+        .fine-zero {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+        .fine-amount {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--gold);
+            background: rgba(251,191,36,0.1);
+            border: 1px solid rgba(251,191,36,0.2);
+            padding: 5px 11px;
+            border-radius: 9px;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            gap: 14px;
+        }
+        .empty-icon { font-size: 3.8rem; opacity: 0.25; }
+        .empty-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+        .empty-sub { font-size: 0.86rem; color: var(--text-dim); opacity: 0.7; }
+
+        /* ── Table footer ── */
+        .table-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--line);
+            background: var(--surface2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .table-footer-text { font-size: 0.8rem; color: var(--text-dim); }
+        .table-footer-text strong { color: var(--text); }
+
+        /* ════════════════════
+           ANIMATIONS
+        ════════════════════ */
+        @keyframes fadeDown {
+            from { opacity:0; transform:translateY(-18px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(18px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:4px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--violet); }
+
+        /* Responsive */
+        @media (max-width:680px) {
+            .page-title { font-size:2rem; }
+            .nav-row { flex-direction: column; }
+            .back-btn { align-self: flex-start; }
+            .summary-row { gap:8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrap">
+
+    <!-- ── Nav Row ── -->
+    <div class="nav-row">
+        <div class="title-block">
+            <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                Reading Journey
+            </div>
+            <h1 class="page-title">Borrowing <em>History</em></h1>
+            <p class="page-sub">Your complete record of past issues, returns, and library transactions.</p>
+        </div>
+        <a class="back-btn" href="{% url 'dashboard' %}">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- ── Summary Chips ── -->
+    <div class="summary-row">
+        <div class="chip">
+            <span class="chip-dot" style="background:var(--violet);"></span>
+            Total Records
+            <span class="chip-num">{{ issues|length }}</span>
+        </div>
+        <div class="chip">
+            <span class="chip-dot" style="background:var(--ok);"></span>
+            Returned
+            <span class="chip-num">{{ returned_count }}</span>
+        </div>
+        <div class="chip">
+            <span class="chip-dot" style="background:var(--danger); animation:blink 1.5s infinite;"></span>
+            With Fine
+            <span class="chip-num">{{ with_fine_count }}</span>
+        </div>
+        <div class="chip">
+            <span class="chip-dot" style="background:var(--gold);"></span>
+            Pending Fine
+            <span class="chip-num">₹{{ pending_fine_total|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <!-- ── Table Card ── -->
+    <div class="table-card">
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book Information</th>
+                        <th>Issued On</th>
+                        <th>Due Date</th>
+                        <th>Return Status</th>
+                        <th>Total Fine</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for issue in issues %}
+                    <tr>
+                        <td>
+                            <div class="book-cell">
+                                <div class="book-icon">📖</div>
+                                <div class="book-title">{{ issue.book.title }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="date-main">{{ issue.issued_at|date:"d M Y" }}</div>
+                            <div class="date-rel">{{ issue.issued_at|date:"H:i" }}</div>
+                        </td>
+                        <td>
+                            <div class="date-main">{{ issue.due_date }}</div>
+                        </td>
+                        <td>
+                            {% if issue.returned_at %}
+                                <div class="badge badge-ok">
+                                    <span class="badge-dot"></span>
+                                    Returned {{ issue.returned_at|date:"d M Y" }}
+                                </div>
+                            {% else %}
+                                <div class="badge badge-danger">
+                                    <span class="badge-dot"></span>
+                                    Still with you
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if issue.display_fine_amount > 0 %}
+                                <span class="fine-amount">₹ {{ issue.display_fine_amount|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="fine-zero">— No fine</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-icon">📚</div>
+                                <div class="empty-title">No records yet</div>
+                                <div class="empty-sub">Books you borrow will appear here once issued.</div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if issues %}
+        <div class="table-footer">
+            <span class="table-footer-text">Showing <strong>{{ issues|length }}</strong> record{{ issues|length|pluralize }}</span>
+            <span class="table-footer-text" style="color:var(--violet); font-weight:600;">Library Management System</span>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+</body>
+</html>

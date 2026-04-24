@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Signup | LMS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #08090d;
+    --surface: #0e1117;
+    --card: #111520;
+    --input-bg: #161b27;
+    --border: rgba(255,255,255,0.07);
+    --border-focus: rgba(249, 115, 22, 0.6);
+    --text: #f0f2f7;
+    --muted: #6b7494;
+    --subtle: #3a4060;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --glow: rgba(249, 115, 22, 0.15);
+    --glow-strong: rgba(249, 115, 22, 0.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+    padding: 16px 0;
+}
+
+/* ── Background atmosphere ── */
+body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 600px;
+    background: radial-gradient(ellipse at center, rgba(249,115,22,0.10) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse at center, rgba(99,102,241,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Grid dot pattern */
+.bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+        radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Wrap ── */
+.wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 660px;
+    padding: 24px 20px;
+}
+
+/* ── Top brand strip ── */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    justify-content: center;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), #f43f5e);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 18px var(--glow-strong);
+}
+
+.brand-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: white;
+}
+
+.brand-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+}
+
+.brand-name span {
+    color: var(--accent);
+}
+
+/* ── Card ── */
+.card {
+    background: var(--card);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    padding: 44px 44px 36px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 80px rgba(249,115,22,0.04);
+}
+
+/* Corner accent glow */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 40px;
+    right: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    border-radius: 0 0 4px 4px;
+}
+
+/* ── Header ── */
+.header {
+    margin-bottom: 32px;
+    position: relative;
+}
+
+.eyebrow {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 1.5px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+h2 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), #f43f5e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+/* ── Divider ── */
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 28px 0;
+}
+
+/* ── Form grid ── */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.full { grid-column: 1 / -1; }
+
+/* ── Field ── */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ── Input wrapper (for icon) ── */
+.input-wrap {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px 14px 12px 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input::placeholder { color: rgba(107,116,148,0.6); }
+
+input:hover, select:hover {
+    border-color: rgba(255,255,255,0.12);
+    background: #1a2030;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--glow), 0 0 20px var(--glow);
+    background: #18202e;
+}
+
+/* Select arrow */
+select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236b7494' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+select option {
+    background: #161b27;
+    color: var(--text);
+}
+
+/* ── Errors ── */
+.err {
+    color: #fc8181;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.err::before {
+    content: '!';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(252,129,129,0.15);
+    border: 1px solid rgba(252,129,129,0.3);
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ── Strength meter (for password) ── */
+.strength-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.strength-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.07);
+    transition: background 0.3s;
+}
+
+/* ── Actions ── */
+.actions {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Primary CTA */
+.btn-primary {
+    position: relative;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    color: white;
+    background: linear-gradient(135deg, var(--accent) 0%, #f43f5e 100%);
+    box-shadow:
+        0 0 0 1px rgba(249,115,22,0.3),
+        0 4px 20px rgba(249,115,22,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before { left: 100%; }
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 0 0 1px rgba(249,115,22,0.4),
+        0 8px 28px rgba(249,115,22,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    opacity: 0.9;
+}
+
+.btn-primary svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Secondary link */
+.btn-link {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.btn-link:hover {
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+}
+
+.btn-link strong {
+    font-weight: 500;
+    color: var(--accent);
+}
+
+/* ── Footer note ── */
+.footer-note {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--subtle);
+    line-height: 1.7;
+}
+
+.footer-note a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s;
+}
+
+.footer-note a:hover { color: var(--accent); }
+
+/* ── Progress dots ── */
+.steps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--subtle);
+    transition: all 0.3s;
+}
+
+.step-dot.active {
+    width: 24px;
+    border-radius: 99px;
+    background: var(--accent);
+}
+
+/* ── Feature badges ── */
+.perks {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.perk {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(249,115,22,0.06);
+    border: 1px solid rgba(249,115,22,0.12);
+    border-radius: 99px;
+    padding: 5px 12px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: rgba(249,115,22,0.8);
+}
+
+.perk svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    body { padding: 10px 0; }
+    .wrap { padding: 14px 14px 20px; }
+    .card { padding: 28px 24px 24px; }
+    .grid { grid-template-columns: 1fr; }
+    h2 { font-size: 1.6rem; }
+    .perks { margin-bottom: 20px; }
+    .perk { flex: 1 1 calc(50% - 8px); justify-content: center; }
+}
+
+@media (max-width: 420px) {
+    .card { padding: 22px 16px 20px; }
+    .brand { margin-bottom: 18px; }
+    .perk { flex: 1 1 100%; }
+}
+
+/* ── Floating animation on load ── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.brand   { animation: fadeUp 0.5s ease both; }
+.card    { animation: fadeUp 0.5s 0.08s ease both; }
+</style>
+</head>
+
+<body>
+<div class="bg-grid"></div>
+
+<div class="wrap">
+
+    <!-- Brand -->
+    <div class="brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+        </div>
+        <span class="brand-name">Library<span>LMS</span></span>
+    </div>
+
+    <form class="card" method="post">
+        {% csrf_token %}
+
+        <!-- Progress steps -->
+        <div class="steps">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="eyebrow">New Account</div>
+            <h2>Join the <em>Library</em></h2>
+            <p class="subtitle">Create your account and start borrowing books today.</p>
+        </div>
+
+        <!-- Perks -->
+        <div class="perks">
+            <div class="perk">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                10,000+ Titles
+            </div>
+            <div class="perk">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Instant Access
+            </div>
+            <div class="perk">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Free Forever
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Form fields -->
+        <div class="grid">
+            {% for field in form %}
+            <div class="field-group {% if field.name == 'password1' or field.name == 'password2' or field.name == 'email' %}full{% endif %}">
+                <label>{{ field.label }}</label>
+                <div class="input-wrap">
+                    <!-- Icon per field type -->
+                    {% if field.name == 'email' %}
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+                    {% elif 'password' in field.name %}
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    {% elif field.name == 'username' %}
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    {% else %}
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+                    {% endif %}
+                    {{ field }}
+                </div>
+                {% if 'password1' in field.name %}
+                <div class="strength-bar">
+                    <div class="strength-seg" id="s1"></div>
+                    <div class="strength-seg" id="s2"></div>
+                    <div class="strength-seg" id="s3"></div>
+                    <div class="strength-seg" id="s4"></div>
+                </div>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="err">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn-primary" type="submit">
+                Complete Registration
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <a class="btn-link" href="{% url 'login' %}">
+                Already a member? <strong>Sign in →</strong>
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<script>
+/* Password strength indicator */
+(function () {
+    var pw = document.querySelector('input[name="password1"]');
+    if (!pw) return;
+    var segs = [
+        document.getElementById('s1'),
+        document.getElementById('s2'),
+        document.getElementById('s3'),
+        document.getElementById('s4')
+    ];
+    var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+    pw.addEventListener('input', function () {
+        var val = pw.value;
+        var score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        segs.forEach(function (s, i) {
+            s.style.background = i < score ? colors[score - 1] : 'rgba(255,255,255,0.07)';
+        });
+    });
+})();
+</script>
+</body>
+</html>
