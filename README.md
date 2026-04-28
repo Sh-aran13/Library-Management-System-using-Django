@@ -88,9 +88,8 @@ From managing the book catalog and physical copies to handling circulation, rene
 | Layer | Technology |
 |---|---|
 | **Backend** | Django (Python) |
-| **Database** | SQLite *(default)* · PostgreSQL *(optional)* |
+| **Database** | PostgreSQL *(defaultl)* |
 | **Frontend** | HTML5 · CSS3 · JavaScript |
-| **ORM** | Django ORM with `Q` objects, `select_related`, `transaction.atomic` |
 | **QR Generation** | `qrcode` Python library *(with frontend fallback)* |
 | **Auth** | Django built-in authentication + custom `Profile` model |
 
